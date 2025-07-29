@@ -1,0 +1,80 @@
+import { CirclePlus } from 'lucide-react';
+
+export const UserModalFormConfig = {
+    moduleTitle: 'Manage Users',
+    title: 'Create User',
+    editTitle: 'Edit User',
+    description: 'Fill in the details below to create a new user.',
+    addButton: {
+        id: 'add-user',
+        label: 'Add user',
+        className: 'bg-indigo-700 text-white rounded-lg px-4 py-2 hover:bg-indigo-800 cursor-pointer',
+        icon: CirclePlus,
+        type: 'button',
+        variant: 'default',
+        permission: 'create-user',
+    },
+    fields: [
+        {
+            id: 'name',
+            key: 'name',
+            name: 'name',
+            label: 'Full name',
+            type: 'text',
+            placeholder: 'Enter full name',
+            autocomplete: 'full-name'
+        },
+        {
+            id: 'email',
+            key: 'email',
+            name: 'email',
+            label: 'Email',
+            type: 'email',
+            placeholder: 'Enter email here',
+            tabIndex: 2,
+        },
+        {
+            id: 'password',
+            key: 'password',
+            name: 'password',
+            label: 'Password',
+            type: 'password',
+            placeholder: 'Enter password here',
+            tabIndex: 3,
+        },
+        {
+            id: 'confirm-password',
+            key: 'confirm_password',
+            name: 'confirm_password',
+            label: 'Confirm password',
+            type: 'password',
+            placeholder: 'Enter confirm password here',
+            tabIndex: 4,
+        },
+        {
+            id: 'roles',
+            key: 'roles',
+            name: 'roles',
+            label: 'Roles',
+            type: 'single-select',
+            tabIndex: 5,
+            options: [],
+        },
+    ],
+    buttons: [
+        {
+            key: 'cancel',
+            type: 'button',
+            label: 'Cancel',
+            variant: 'ghost',
+            className: 'cursor-pointer',
+        },
+        {
+            key: 'submit',
+            type: 'submit',
+            label: 'Save Permission',
+            variant: 'default',
+            className: 'cursor-pointer',
+        },
+    ],
+};

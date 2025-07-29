@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -13,7 +15,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    Route::resource('permissions', PermissionController::class)->only('index', 'store');
+    Route::resource('permissions', PermissionController::class)->only('index', 'store', 'update', 'destroy');
+    Route::resource('roles', RoleController::class)->only('index', 'store', 'update', 'destroy');
+    Route::resource('users', UserController::class)->only('index', 'store', 'update', 'destroy');
 });
 
 require __DIR__.'/settings.php';

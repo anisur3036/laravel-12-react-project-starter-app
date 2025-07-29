@@ -1,5 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import * as LucidIcons from 'lucide-react';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
 
 interface TableColumn {
     label: string;
@@ -27,24 +29,35 @@ interface AppTableProps {
     actions: ActionColumn[];
     data: TableRow[];
     from: number;
-    // from: number;
-    // onDelete: (route: string) => void;
-    // onView: (row: TableRow) => void;
-    // onEdit: (row: TableRow) => void;
-    // isModal?: boolean;
+    onDelete: (route: string) => void;
+    onEdit: (row: TableRow) => void;
+    isModal?: boolean;
 }
 
-export const AppTable = ({ columns, actions, data, from }: AppTableProps) => {
+export const AppTable = ({ columns, actions, data, from, onEdit, onDelete, isModal }: AppTableProps) => {
     const renderActionButton = (row: TableRow) => {
         return (
-            <div className="flex gap-2">
+            <div className="flex gap-1">
                 {actions.map((action, index) => {
                     const IconComponent = LucidIcons[action.icon] as React.ElementType;
-                    return (
-                        <span className={action.className} key={index}>
-                            <IconComponent size={18} />
-                        </span>
-                    );
+
+                    if (isModal) {
+                        if (action.label === 'Edit') {
+                            return (
+                                <Button variant="ghost" key={index} className={action.className} onClick={() => onEdit(row)}>
+                                    <IconComponent size={18} />
+                                </Button>
+                            );
+                        }
+                    }
+
+                    if (action.label === 'Delete') {
+                        return (
+                            <Button variant="ghost" key={index} className={action.className} onClick={() => onDelete(route(action.route, row.id))}>
+                                <IconComponent size={18} />
+                            </Button>
+                        );
+                    }
                 })}
             </div>
         );
@@ -66,7 +79,21 @@ export const AppTable = ({ columns, actions, data, from }: AppTableProps) => {
                         <TableRow key={index}>
                             <TableCell>{index + from}</TableCell>
                             {columns.map((col) => (
-                                <TableCell key={col.key}>{col.isAction ? renderActionButton(row) : row[col.key]}</TableCell>
+                                <TableCell key={col.key}>
+                                    {col.isAction ? (
+                                        renderActionButton(row)
+                                    ) : col.type === 'multi-values' && Array.isArray(row[col.key]) ? (
+                                        <div className="flex flex-wrap items-center justify-center gap-1">
+                                            {row[col.key].map((permission: any) => (
+                                                <Badge key={permission.id} variant="outline">
+                                                    {permission.label}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        row[col.key]
+                                    )}
+                                </TableCell>
                             ))}
                         </TableRow>
                     ))

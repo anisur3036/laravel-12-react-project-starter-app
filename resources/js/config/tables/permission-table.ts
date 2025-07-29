@@ -16,7 +16,7 @@ export const PermissionsTableConfig = {
         {
             label: 'Delete',
             icon: 'Trash2',
-            route: 'categories.destroy',
+            route: 'permissions.destroy',
             className: 'cursor-pointer p-0.5 text-red-500 hover:opacity-90',
             permission: 'delete-permission',
         },

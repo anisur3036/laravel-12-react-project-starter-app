@@ -2,8 +2,8 @@ import { AppFormModal } from '@/components/app-form-modal';
 import { AppTable } from '@/components/app-table';
 import { AppToast, toast } from '@/components/app-toast';
 import { Input } from '@/components/ui/input';
-import { PermissionModalFormConfig } from '@/config/modals/permission-modal';
-import { PermissionsTableConfig } from '@/config/tables/permission-table';
+import { RoleModalFormConfig } from '@/config/modals/role-modal';
+import { RoleTableConfig } from '@/config/tables/role-table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -11,8 +11,8 @@ import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Manage Permissions',
-        href: '/permissions',
+        title: 'Manage Roles',
+        href: '/roles',
     },
 ];
 
@@ -23,10 +23,9 @@ interface FlashProps extends Record<string, any> {
     };
 }
 
-interface Permission {
+interface Role {
     data: {
         id: string;
-        module: string;
         name: string;
         label: string;
         description: string;
@@ -37,20 +36,23 @@ interface Permission {
 }
 
 interface IndexProps {
-    permissions: Permission;
+    roles: Role;
 }
 
-export default function Index({ permissions }: IndexProps) {
-    const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
-    const flashMessage = flash?.success || flash?.error;
+export default function Index({ roles }: IndexProps) {
     const [open, setOpen] = useState(false);
-    const [mode, setMode] = useState<'create' | 'edit'>('create');
-    const [selectedPermission, setSelectedPermission] = useState<any>(null);
-    const { data, setData, errors, processing, reset, post } = useForm({
-        module: '',
-        name: '',
+    const [mode, setMode] = useState<'create' | 'edit' | 'view'>('create');
+    const [selectedRole, setSelectedRole] = useState<any>(null);
+    const { permissions } = usePage().props;
+    const { data, setData, errors, processing, reset, post } = useForm<{
+        label: string;
+        description: string;
+        permissions: string[];
+        _method: string;
+    }>({
         label: '',
         description: '',
+        permissions: [],
         _method: 'POST',
     });
 
@@ -58,9 +60,9 @@ export default function Index({ permissions }: IndexProps) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (mode === 'edit' && selectedPermission) {
+        if (mode === 'edit' && selectedRole) {
             data._method = 'PUT';
-            post(route('permissions.update', selectedPermission.id), {
+            post(route('roles.update', selectedRole.id), {
                 // forceFormData: true,
                 onSuccess: (response: { props: FlashProps }) => {
                     const successMessage = response.props.flash?.success;
@@ -69,7 +71,7 @@ export default function Index({ permissions }: IndexProps) {
                 },
             });
         } else {
-            post(route('permissions.store'), {
+            post(route('roles.store'), {
                 onSuccess: (response: { props: FlashProps }) => {
                     const successMessage = response.props.flash?.success;
                     toast.success(successMessage);
@@ -96,15 +98,19 @@ export default function Index({ permissions }: IndexProps) {
         }
     };
 
-    const openModal = (mode: 'create' | 'edit', permission?: any) => {
+    const openModal = (mode: 'create' | 'edit', role?: any) => {
         setMode(mode);
 
-        if (permission) {
-            Object.entries(permission).forEach(([key, value]) => {
-                setData(key as keyof typeof data, value as string);
+        if (role) {
+            Object.entries(role).forEach(([key, value]) => {
+                if(key === 'permissions' && Array.isArray(value)) {
+                    setData('permissions', value.map((permission: any) => permission.name));
+                } else {
+                    setData(key as keyof typeof data, (value as string | null) ?? '');
+                }
             });
 
-            setSelectedPermission(permission);
+            setSelectedRole(role);
         } else {
             reset();
         }
@@ -130,7 +136,7 @@ export default function Index({ permissions }: IndexProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Permissions" />
+            <Head title="Roles" />
             <AppToast />
             <div className="m-4 flex items-center justify-between">
                 <Input
@@ -138,11 +144,12 @@ export default function Index({ permissions }: IndexProps) {
                     // onKeyPress={(e) => onKeyPress("name", e)}
                     // defaultValue={queryParams.name}
                     className="max-w-sm"
-                    placeholder="Please search permission..."
+                    placeholder="Please search role..."
                 />
+
                 <AppFormModal
                     /*@ts-ignore*/
-                    config={PermissionModalFormConfig}
+                    config={RoleModalFormConfig}
                     data={data}
                     setData={setData}
                     errors={errors}
@@ -151,16 +158,17 @@ export default function Index({ permissions }: IndexProps) {
                     open={open}
                     onOpenChange={handleModalOpen}
                     mode={mode}
+                    extraData={permissions}
                 />
             </div>
             <div className="mx-4 flex h-full flex-1 flex-col gap-4 rounded-xl">
                 <AppTable
-                    columns={PermissionsTableConfig.columns}
+                    columns={RoleTableConfig.columns}
                     /*@ts-ignore*/
-                    actions={PermissionsTableConfig.actions}
-                    data={permissions.data}
-                    from={permissions.meta.from}
-                    onEdit={(permission) => openModal('edit', permission)}
+                    actions={RoleTableConfig.actions}
+                    data={roles.data}
+                    from={roles.meta.from}
+                    onEdit={(role) => openModal('edit', role)}
                     onDelete={handleDelete}
                     isModal={true}
                 />

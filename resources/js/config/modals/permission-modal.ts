@@ -3,6 +3,7 @@ import { CirclePlus } from 'lucide-react';
 export const PermissionModalFormConfig = {
     moduleTitle: 'Manage Permissions',
     title: 'Create Permission',
+    editTitle: 'Edit Permission',
     description: 'Fill in the details below to create a new permission.',
     addButton: {
         id: 'add-permission',

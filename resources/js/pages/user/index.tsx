@@ -2,8 +2,8 @@ import { AppFormModal } from '@/components/app-form-modal';
 import { AppTable } from '@/components/app-table';
 import { AppToast, toast } from '@/components/app-toast';
 import { Input } from '@/components/ui/input';
-import { PermissionModalFormConfig } from '@/config/modals/permission-modal';
-import { PermissionsTableConfig } from '@/config/tables/permission-table';
+import { UserModalFormConfig } from '@/config/modals/user-modal';
+import { UserTableConfig } from '@/config/tables/user-table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -11,8 +11,8 @@ import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Manage Permissions',
-        href: '/permissions',
+        title: 'Manage users',
+        href: '/users',
     },
 ];
 
@@ -23,10 +23,9 @@ interface FlashProps extends Record<string, any> {
     };
 }
 
-interface Permission {
+interface User {
     data: {
         id: string;
-        module: string;
         name: string;
         label: string;
         description: string;
@@ -37,20 +36,25 @@ interface Permission {
 }
 
 interface IndexProps {
-    permissions: Permission;
+    users: User;
 }
 
-export default function Index({ permissions }: IndexProps) {
-    const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
-    const flashMessage = flash?.success || flash?.error;
+export default function Index({ users }: IndexProps) {
     const [open, setOpen] = useState(false);
-    const [mode, setMode] = useState<'create' | 'edit'>('create');
-    const [selectedPermission, setSelectedPermission] = useState<any>(null);
-    const { data, setData, errors, processing, reset, post } = useForm({
-        module: '',
+    const [mode, setMode] = useState<'create' | 'edit' | 'view'>('create');
+    const [selectedUser, setSelectedUser] = useState<any>(null);
+    const { props } = usePage();
+    const { data, setData, errors, processing, reset, post } = useForm<{
+        name: string;
+        email: string;
+        password: string;
+        roles: string;
+        _method: string;
+    }>({
         name: '',
-        label: '',
-        description: '',
+        email: '',
+        password: '',
+        roles: '',
         _method: 'POST',
     });
 
@@ -58,9 +62,9 @@ export default function Index({ permissions }: IndexProps) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (mode === 'edit' && selectedPermission) {
+        if (mode === 'edit' && selectedUser) {
             data._method = 'PUT';
-            post(route('permissions.update', selectedPermission.id), {
+            post(route('users.update', selectedUser.id), {
                 // forceFormData: true,
                 onSuccess: (response: { props: FlashProps }) => {
                     const successMessage = response.props.flash?.success;
@@ -69,7 +73,7 @@ export default function Index({ permissions }: IndexProps) {
                 },
             });
         } else {
-            post(route('permissions.store'), {
+            post(route('users.store'), {
                 onSuccess: (response: { props: FlashProps }) => {
                     const successMessage = response.props.flash?.success;
                     toast.success(successMessage);
@@ -96,15 +100,18 @@ export default function Index({ permissions }: IndexProps) {
         }
     };
 
-    const openModal = (mode: 'create' | 'edit', permission?: any) => {
+    const openModal = (mode: 'create' | 'edit' | 'view', role?: any) => {
         setMode(mode);
 
-        if (permission) {
-            Object.entries(permission).forEach(([key, value]) => {
-                setData(key as keyof typeof data, value as string);
+        if (role) {
+            Object.entries(role).forEach(([key, value]) => {
+                if(key === 'roles' && Array.isArray(value)) {
+                    setData('roles', value[0]?.name);
+                } else {
+                    setData(key as keyof typeof data, (value as string | null) ?? '');
+                }
             });
-
-            setSelectedPermission(permission);
+            setSelectedUser(role);
         } else {
             reset();
         }
@@ -130,19 +137,17 @@ export default function Index({ permissions }: IndexProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Permissions" />
+            <Head title="Users" />
             <AppToast />
             <div className="m-4 flex items-center justify-between">
                 <Input
-                    // onBlur={(e) => searchFieldChanged("name", e.target.value)}
-                    // onKeyPress={(e) => onKeyPress("name", e)}
-                    // defaultValue={queryParams.name}
                     className="max-w-sm"
-                    placeholder="Please search permission..."
+                    placeholder="Please search user..."
                 />
+
                 <AppFormModal
                     /*@ts-ignore*/
-                    config={PermissionModalFormConfig}
+                    config={UserModalFormConfig}
                     data={data}
                     setData={setData}
                     errors={errors}
@@ -151,16 +156,17 @@ export default function Index({ permissions }: IndexProps) {
                     open={open}
                     onOpenChange={handleModalOpen}
                     mode={mode}
+                    extraData={props}
                 />
             </div>
             <div className="mx-4 flex h-full flex-1 flex-col gap-4 rounded-xl">
                 <AppTable
-                    columns={PermissionsTableConfig.columns}
+                    columns={UserTableConfig.columns}
                     /*@ts-ignore*/
-                    actions={PermissionsTableConfig.actions}
-                    data={permissions.data}
-                    from={permissions.meta.from}
-                    onEdit={(permission) => openModal('edit', permission)}
+                    actions={UserTableConfig.actions}
+                    data={users.data}
+                    from={users.meta.from}
+                    onEdit={(user) => openModal('edit', user)}
                     onDelete={handleDelete}
                     isModal={true}
                 />
