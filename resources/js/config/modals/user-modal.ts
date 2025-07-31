@@ -22,7 +22,7 @@ export const UserModalFormConfig = {
             label: 'Full name',
             type: 'text',
             placeholder: 'Enter full name',
-            autocomplete: 'full-name'
+            autocomplete: 'full-name',
         },
         {
             id: 'email',

@@ -1,4 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { hasPermission } from '@/utils/authorization';
+import { usePage } from '@inertiajs/react';
 import * as LucidIcons from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -35,6 +37,10 @@ interface AppTableProps {
 }
 
 export const AppTable = ({ columns, actions, data, from, onEdit, onDelete, isModal }: AppTableProps) => {
+    const { auth } = usePage().props as any;
+    const roles = auth.roles;
+    const permissions = auth.permissions;
+
     const renderActionButton = (row: TableRow) => {
         return (
             <div className="flex gap-1">
@@ -42,7 +48,7 @@ export const AppTable = ({ columns, actions, data, from, onEdit, onDelete, isMod
                     const IconComponent = LucidIcons[action.icon] as React.ElementType;
 
                     if (isModal) {
-                        if (action.label === 'Edit') {
+                        if (action.label === 'Edit' /**&& action.permission && hasPermission(permissions, action.permission)*/) {
                             return (
                                 <Button variant="ghost" key={index} className={action.className} onClick={() => onEdit(row)}>
                                     <IconComponent size={18} />
@@ -51,7 +57,7 @@ export const AppTable = ({ columns, actions, data, from, onEdit, onDelete, isMod
                         }
                     }
 
-                    if (action.label === 'Delete') {
+                    if (action.label === 'Delete' && action.permission && hasPermission(permissions, action.permission)) {
                         return (
                             <Button variant="ghost" key={index} className={action.className} onClick={() => onDelete(route(action.route, row.id))}>
                                 <IconComponent size={18} />

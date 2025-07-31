@@ -10,14 +10,14 @@ export const RoleTableConfig = {
             label: 'Edit',
             icon: 'Pencil',
             className: 'cursor-pointer text-blue-500 hover:opacity-90',
-            permission: 'edit-role',
+            permission: 'edit-user',
         },
         {
             label: 'Delete',
             icon: 'Trash2',
             route: 'roles.destroy',
             className: 'cursor-pointer text-red-500 hover:opacity-90',
-            permission: 'delete-role',
+            permission: 'delete-user',
         },
     ],
 };

@@ -103,8 +103,11 @@ export default function Index({ roles }: IndexProps) {
 
         if (role) {
             Object.entries(role).forEach(([key, value]) => {
-                if(key === 'permissions' && Array.isArray(value)) {
-                    setData('permissions', value.map((permission: any) => permission.name));
+                if (key === 'permissions' && Array.isArray(value)) {
+                    setData(
+                        'permissions',
+                        value.map((permission: any) => permission.name),
+                    );
                 } else {
                     setData(key as keyof typeof data, (value as string | null) ?? '');
                 }

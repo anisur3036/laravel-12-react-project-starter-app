@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Response;
 
 class UserController extends Controller
@@ -17,9 +18,10 @@ class UserController extends Controller
      */
     public function index(): Response
     {
-        $users = User::with('roles')->latest()->paginate();
 
+        $users = User::with('roles')->latest()->paginate();
         $roles =  Role::get();
+
         return inertia('user/index', [
             'users' => UserResource::collection($users),
             'roles' => $roles,

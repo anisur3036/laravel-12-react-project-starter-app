@@ -10,11 +10,15 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+//verifyed user
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+});
 
+// only-supper-admin
+Route::group(['middleware' => ['auth', 'verified', /*'role:super-admin'*/]], function() {
     Route::resource('permissions', PermissionController::class)->only('index', 'store', 'update', 'destroy');
     Route::resource('roles', RoleController::class)->only('index', 'store', 'update', 'destroy');
     Route::resource('users', UserController::class)->only('index', 'store', 'update', 'destroy');
