@@ -19,9 +19,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // only-supper-admin
 Route::group(['middleware' => ['auth', 'verified', /*'role:super-admin'*/]], function() {
-    Route::resource('permissions', PermissionController::class)->only('index', 'store', 'update', 'destroy');
-    Route::resource('roles', RoleController::class)->only('index', 'store', 'update', 'destroy');
-    Route::resource('users', UserController::class)->only('index', 'store', 'update', 'destroy');
+    Route::resource('admin/permissions', PermissionController::class)->only('index', 'store', 'update', 'destroy');
+    Route::resource('admin/roles', RoleController::class)->only('index', 'store', 'update', 'destroy');
+    Route::resource('admin/users', UserController::class)->only('index', 'store', 'update', 'destroy');
 });
 
 require __DIR__.'/settings.php';
