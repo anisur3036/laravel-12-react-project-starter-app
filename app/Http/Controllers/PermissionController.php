@@ -18,10 +18,14 @@ class PermissionController extends Controller
      */
     public function index(): Response
     {
-        $permissions = Permission::latest()->paginate(10);
+        $perPage = (int) request('perPage') ?? 10;
+        $permissions = Permission::query()
+            ->when(request('search'), fn($query, $search) => $query->where('name', 'like', '%' . $search . '%'))
+            ->latest()->paginate($perPage)->withQueryString();
 
         return Inertia::render('permission/index', [
             'permissions' => PermissionResource::collection($permissions),
+            'filters' => request()->only(['search', 'perPage']),
         ]);
     }
 

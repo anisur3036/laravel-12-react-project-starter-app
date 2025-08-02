@@ -48,7 +48,7 @@ export const AppTable = ({ columns, actions, data, from, onEdit, onDelete, isMod
                     const IconComponent = LucidIcons[action.icon] as React.ElementType;
 
                     if (isModal) {
-                        if (action.label === 'Edit' /**&& action.permission && hasPermission(permissions, action.permission)*/) {
+                        if (action.label === 'Edit' && action.permission && hasPermission(permissions, action.permission)) {
                             return (
                                 <Button variant="ghost" key={index} className={action.className} onClick={() => onEdit(row)}>
                                     <IconComponent size={18} />

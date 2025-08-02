@@ -1,12 +1,15 @@
 import { AppFormModal } from '@/components/app-form-modal';
 import { AppTable } from '@/components/app-table';
 import { AppToast, toast } from '@/components/app-toast';
+import { Pagination } from '@/components/pagination';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PermissionModalFormConfig } from '@/config/modals/permission-modal';
 import { PermissionsTableConfig } from '@/config/tables/permission-table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { XIcon } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -33,24 +36,47 @@ interface Permission {
     }[];
     meta: {
         from: number;
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        to: number;
+        total: number;
+        links: {
+            active: boolean;
+            label: string;
+            url: string;
+        }[];
     };
+    links: {
+        first: string;
+        last: string;
+        next: string;
+        prev: string;
+    }[];
 }
 
 interface IndexProps {
     permissions: Permission;
+    filters: {
+        search: string;
+        perPage: string;
+    };
 }
 
-export default function Index({ permissions }: IndexProps) {
+export default function Index({ permissions, filters }: IndexProps) {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const flashMessage = flash?.success || flash?.error;
     const [open, setOpen] = useState(false);
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [selectedPermission, setSelectedPermission] = useState<any>(null);
+
     const { data, setData, errors, processing, reset, post } = useForm({
         module: '',
         name: '',
         label: '',
         description: '',
+        search: filters.search || '',
+        perPage: filters.perPage || '10',
         _method: 'POST',
     });
 
@@ -128,18 +154,55 @@ export default function Index({ permissions }: IndexProps) {
         }
     };
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setData('search', value);
+
+        const queryString = value ? { search: value } : {};
+
+        router.get(route('permissions.index'), queryString, {
+            preserveScroll: true,
+            preserveState: true,
+        });
+    };
+
+    const clearFilters = () => {
+        setData('search', '');
+        router.get(
+            route('permissions.index'),
+            { search: '' },
+            {
+                preserveScroll: true,
+                preserveState: true,
+            },
+        );
+    };
+
+    const handlePerPageChange = (value: string) => {
+        setData('perPage', value);
+
+        router.get(
+            route('permissions.index'),
+            { perPage: value },
+            {
+                preserveScroll: true,
+                preserveState: true,
+            },
+        );
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Permissions" />
             <AppToast />
             <div className="m-4 flex items-center justify-between">
-                <Input
-                    // onBlur={(e) => searchFieldChanged("name", e.target.value)}
-                    // onKeyPress={(e) => onKeyPress("name", e)}
-                    // defaultValue={queryParams.name}
-                    className="max-w-sm"
-                    placeholder="Please search permission..."
-                />
+                <div className="flex items-center gap-4">
+                    <Input defaultValue={data.search} onBlur={handleChange} className="max-w-sm" placeholder="Please search permission..." />
+                    <Button onClick={clearFilters} className="cursor-pointer text-red-600 hover:text-red-500" variant="outline">
+                        <XIcon size={18} />
+                    </Button>
+                </div>
+
                 <AppFormModal
                     /*@ts-ignore*/
                     config={PermissionModalFormConfig}
@@ -164,6 +227,7 @@ export default function Index({ permissions }: IndexProps) {
                     onDelete={handleDelete}
                     isModal={true}
                 />
+                <Pagination meta={permissions.meta} perPage={data.perPage} onPerPageChange={handlePerPageChange} />
             </div>
         </AppLayout>
     );

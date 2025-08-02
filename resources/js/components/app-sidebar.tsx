@@ -1,4 +1,3 @@
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
@@ -11,7 +10,6 @@ export function AppSidebar() {
     const { url } = usePage();
     const { auth } = usePage().props as any;
     const permissions = auth?.permissions;
-
 
     const mainNavItems: NavItem[] = [
         {
@@ -42,7 +40,6 @@ export function AppSidebar() {
             ],
         },
     ];
-
 
     const filteredNavItems = mainNavItems.filter((item) => !item.permission || permissions.includes(item.permission));
 

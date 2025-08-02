@@ -24,7 +24,7 @@ export interface NavItem {
     items?: {
         title: string;
         href: string;
-    }[]
+    }[];
 }
 
 export interface SharedData {
